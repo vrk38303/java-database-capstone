@@ -1,104 +1,179 @@
-<!-- index.html -->
-<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Clinic - Select Role</title>
+    <link rel="icon" type="image/png" href="assets/images/logo/logo.png">
+    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="js/util.js" defer></script>
+    <script src="js/render.js" defer></script>
+    <script src="js/components/header.js" defer></script>
+    <script src="js/components/footer.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <div class="wrapper">
+            <div id="header"></div>
+            <main class="main-content">
+                <h1>Welcome to Smart Clinic</h1>
+                <h2>Select Your Role</h2>
+                <div class="role-buttons">
+                    <button class="role-btn admin-btn" onclick="showLoginModal('admin')">Admin</button>
+                    <button class="role-btn patient-btn" onclick="showLoginModal('patient')">Patient</button>
+                    <button class="role-btn doctor-btn" onclick="showLoginModal('doctor')">Doctor</button>
+                </div>
+                <div class="patient-register">
+                    <p>New Patient? <a href="#" onclick="showRegisterModal()">Register here</a></p>
+                </div>
+            </main>
+            <div id="footer"></div>
+        </div>
+    </div>
 
-Step-by-Step Explanation of `index.html`.
-This file allows users to select a role (Admin, Patient, Doctor) 
-and triggers modal-based login functionality.
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
 
-1. Label the File
-
-   * Add a comment at the very top to identify the file as `index.html`. This helps developers stay organized.
-
-2. Declare Document Type
-
-   * Use the declaration for HTML5 so browsers know how to render the page correctly.
-
-3. Start the HTML Document
-
-   * Begin the HTML structure and set the document language to English to improve accessibility and SEO `lang="en"`.
-
-4. Head Section (Metadata and Resources)
-
-   * Open the `<head>` section which contains settings and links that don’t show up visually.
-
-5. Set Character Encoding
-
-   * Specify UTF-8 encoding to support most global characters and symbols.
-
-6. Set the Page Title
-
-   * Give the page a name (e.g., "Select Role") that appears on the browser tab.
-
-7. Add a Favicon
-
-   * Link to an icon (like a logo) that will appear in the browser tab from the address `href="../assets/images/logo/Logo.png"`
-
-8. Link Stylesheets
-
-   * Add a page-specific stylesheet for layout and design.
-   * Also include a global stylesheet for shared site-wide styles.
-
-   HINT:
-      `<link rel="stylesheet" href="../assets/css/index.css">`
-      `<link rel="stylesheet" href="../assets/css/style.css">`
-
-9. Add JavaScript Files with `defer`
-
-   * Link utility and rendering JavaScript files (e.g., `util.js`, `render.js`).
-   * Include scripts for rendering components like header and footer.
-   * Use the `defer` attribute so they load after the HTML is parsed.
-
-   HINT:
-      `<script src="../js/util.js" defer></script>`
-      `<script src="../js/render.js" defer></script>`
-      `<script src="../js/components/header.js" defer></script>`
-      `<script src="../js/components/footer.js" defer></script>`
-      
-10. Close the Head and Open the Body
-
-    * Wrap up metadata and begin the visible page content.
-
-11. Create a Container
-
-    * Add a main container to hold all page elements and apply layout constraints.
-
-12. Use a Wrapper for Structure
-
-    * Inside the container, add a wrapper to group header, main, and footer sections logically.
-
-13. Insert a Header Placeholder
-
-    * Add a `div` that will be dynamically filled by JavaScript with the site’s header.
-
-14. Define the Main Section
-
-    * Use a semantic `<main>` tag to hold the central content of the page.
-
-15. Add a Heading for Role Selection
-
-    * Display a heading like “Select Your Role” to instruct users.
-
-16. Add Buttons for Roles
-
-    * Create buttons for each role: Admin, Patient, and Doctor.
-    * Assign unique identifiers or `onclick` handlers to them as needed.
-
-17. Insert a Footer Placeholder
-
-    * Add a `div` that will be dynamically filled by JavaScript with the site’s footer.
-
-18. Create a Modal Structure
-
-    * Add a modal overlay for popups (like login forms).
-    * Include a close button and an inner container for dynamic content.
-
-19. Load Page-Specific Logic Module
-
-    * Use a `<script type="module">` tag to load the role selection logic (e.g., `index.js`).
-    * Ensure it’s deferred so it doesn’t block HTML rendering.
-
-20. Close the Body and HTML Tags
-
-    * Properly close all opened tags to complete the document structure.
-
- -->
+    <script type="module" src="js/services/index.js"></script>
+    <script>
+        function showLoginModal(role) {
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalContent = document.getElementById('modal-content');
+            
+            let title = role.charAt(0).toUpperCase() + role.slice(1) + ' Login';
+            let action = role === 'admin' ? '/admin/login' : (role === 'doctor' ? '/doctor/login' : '/patient/login');
+            
+            modalContent.innerHTML = `
+                <h2>${title}</h2>
+                <form id="login-form" onsubmit="handleLogin(event, '${role}')">
+                    <div class="form-group">
+                        <label for="email">${role === 'admin' ? 'Username' : 'Email'}</label>
+                        <input type="${role === 'admin' ? 'text' : 'email'}" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Login</button>
+                    <p id="login-error" class="error-message"></p>
+                </form>
+            `;
+            
+            modalOverlay.classList.remove('hidden');
+        }
+        
+        function showRegisterModal() {
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContent.innerHTML = `
+                <h2>Patient Registration</h2>
+                <form id="register-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required minlength="3" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone (10 digits)</label>
+                        <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" name="address">
+                    </div>
+                    <button type="submit" class="submit-btn">Register</button>
+                    <p id="register-error" class="error-message"></p>
+                </form>
+            `;
+            
+            modalOverlay.classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
+        
+        async function handleLogin(event, role) {
+            event.preventDefault();
+            const form = event.target;
+            const email = form.email.value;
+            const password = form.password.value;
+            
+            try {
+                const endpoint = role === 'admin' ? '/admin/login' : (role === 'doctor' ? '/doctor/login' : '/patient/login');
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', role);
+                    if (data.patientId) localStorage.setItem('patientId', data.patientId);
+                    
+                    if (role === 'admin') {
+                        window.location.href = `/adminDashboard/${data.token}`;
+                    } else if (role === 'doctor') {
+                        window.location.href = `/doctorDashboard/${data.token}`;
+                    } else {
+                        window.location.href = '/pages/loggedPatientDashboard.html';
+                    }
+                } else {
+                    document.getElementById('login-error').textContent = data.error || 'Login failed';
+                }
+            } catch (error) {
+                document.getElementById('login-error').textContent = 'Network error. Please try again.';
+            }
+        }
+        
+        async function handleRegister(event) {
+            event.preventDefault();
+            const form = event.target;
+            
+            const patient = {
+                name: form.name.value,
+                email: form.email.value,
+                password: form.password.value,
+                phone: form.phone.value,
+                address: form.address.value
+            };
+            
+            try {
+                const response = await fetch('/patient', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(patient)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    closeModal();
+                    showLoginModal('patient');
+                } else {
+                    document.getElementById('register-error').textContent = data.error || 'Registration failed';
+                }
+            } catch (error) {
+                document.getElementById('register-error').textContent = 'Network error. Please try again.';
+            }
+        }
+    </script>
+</body>
+</html>
