@@ -2,7 +2,11 @@ package com.project.back_end.controllers;
 
 import com.project.back_end.models.Appointment;
 import com.project.back_end.services.AppointmentService;
+import com.project.back_end.services.PatientService;
 import com.project.back_end.services.Service;
+import com.project.back_end.services.TokenService;
+import com.project.back_end.models.Patient;
+import com.project.back_end.repo.PatientRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +17,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("${api.path}appointment")
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
     private final Service service;
+    private final PatientService patientService;
+    private final TokenService tokenService;
+    private final PatientRepository patientRepository;
 
-    public AppointmentController(AppointmentService appointmentService, Service service) {
+    public AppointmentController(AppointmentService appointmentService, Service service,
+                                  PatientService patientService, TokenService tokenService,
+                                  PatientRepository patientRepository) {
         this.appointmentService = appointmentService;
         this.service = service;
+        this.patientService = patientService;
+        this.tokenService = tokenService;
+        this.patientRepository = patientRepository;
     }
 
     @GetMapping("/{doctorId}/{date}/{patientName}/{token}")
@@ -91,5 +103,26 @@ public class AppointmentController {
         appointmentService.changeStatus(appointmentId, status);
         response.put("message", "Status updated successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/patient/{token}")
+    public ResponseEntity<?> getPatientAppointments(@PathVariable String token) {
+        ResponseEntity<Map<String, String>> validation = service.validateToken(token, "patient");
+        if (validation != null) return validation;
+
+        try {
+            String email = tokenService.extractEmail(token);
+            Patient patient = patientRepository.findByEmail(email);
+            if (patient == null) {
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Patient not found");
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+            return patientService.getPatientAppointment(patient.getId());
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Error fetching appointments");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

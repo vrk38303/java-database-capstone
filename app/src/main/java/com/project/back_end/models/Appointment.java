@@ -1,6 +1,7 @@
 package com.project.back_end.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class Appointment {
     private Patient patient;
 
     @NotNull
+    @FutureOrPresent(message = "Appointment time must be in the present or future")
     private LocalDateTime appointmentTime;
 
     @NotNull
